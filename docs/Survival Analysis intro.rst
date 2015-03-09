@@ -113,15 +113,15 @@ information at :math:`t=10`).
 Survival analysis was originally developed to solve this type of
 problem, that is, to deal with estimation when our data is
 right-censored. Even in the case where all events have been
-observed, i.e. no censorship, survival analysis is still a very useful
+observed, i.e. no censorship, survival analysis can still be very useful
 to understand durations.
 
 The observations need not always start at zero, either. This was done
-only for understanding in the above example. Consider the example of
-a customer entering a store is a birth: a customer can enter at
+only to simplify the above example. Consider the example of
+a customer entering a store as a birth: a customer can enter at
 any time, and not necessarily at time zero. In survival analysis, durations
 are relative: individuals may start at different times. (We actually only need the *duration* of the observation, and not
-the necessarily the start and end time.)
+necessarily the start and end times.)
 
 We next introduce the two fundamental objects in survival analysis, the
 *survival function* and the *hazard function*.
@@ -186,7 +186,7 @@ Upon differentiation and some algebra, we recover:
 
 Of course, we do not observe the true survival curve of a population. We
 must use the observed data to estimate it. We also want to continue to
-be non-parametric, that is not assume anything about how the
+be non-parametric, that is, not assume anything about how the
 survival curve looks. The *best* method to recreate the survival
 function non-parametrically from the data is known as the Kaplan-Meier
 estimate, which brings us to :doc:`estimation using lifelines</Intro to lifelines>`.
