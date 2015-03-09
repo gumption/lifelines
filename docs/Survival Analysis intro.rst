@@ -57,7 +57,8 @@ situation.
 
 .. code:: python
 
-    
+    import numpy as np
+    from matplotlib import pyplot as plt
     from lifelines.plotting import plot_lifetimes
     from numpy.random import uniform, exponential
     
@@ -89,9 +90,9 @@ situation.
 The red lines denote the lifespan of individuals where the death event
 has been observed, and the blue lines denote the lifespan of the
 right-censored individuals (deaths have not been observed). If we are
-asked to estimate the average lifetime of our population, and we naivly
+asked to estimate the average lifetime of our population, and we naively
 decided to *not* included the right-censored individuals, it is clear
-that we would be serverly underestimating the true average lifespan.
+that we would be severely underestimating the true average lifespan.
 
 Furthermore, if we instead simply took the mean of *all* observed
 lifespans, including the current lifespans of right-censored instances,
