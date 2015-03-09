@@ -6,7 +6,7 @@ Introduction to using lifelines
 =====================================
 
 In the previous :doc:`section</Survival Analysis intro>`,
-we introduced how survival analysis is used, needed, and the
+we introduced how and why survival analysis is used, and the
 mathematical objects that it relies on. In this article, we will work
 with real data and the *lifelines* library to estimate these mathematical objects.
 
@@ -17,19 +17,19 @@ For this example, we will be investigating the lifetimes of political
 leaders around the world. A political leader in this case is defined by a single
 individual's time in office who controls the ruling regime. This could be an
 elected president, unelected dictator, monarch, etc. The birth event is
-the start of the individual's tenor, and the death event is the retirement of the
-individual. Censorship can occur if they are a) still in offices at the
-time of dataset complilation (2008), or b) die while in office (this
+the start of the individual's tenure, and the death event is the retirement of the
+individual. Censorship can occur if a political leader is a) still in office at the
+time of dataset compilation (2008), or b) dies while in office (this
 includes assassinations).
 
-For example, the Bush regime began in 2000 and officially ended in 2008
+For example, the George W. Bush regime in the U.S. began in 2000 and officially ended in 2008
 upon his retirement, thus this regime's lifespan was 8 years and the
-"death" event was observed. On the other hand, the JFK regime lasted 2
+"death" event was observed. On the other hand, the John F. Kennedy regime lasted 2
 years, from 1961 and 1963, and the regime's official death event *was
 not* observed -- JFK died before his official retirement.
 
-(This is an example that has gladly redefined the birth and death
-events, and infact completely flips the idea upside down by using deaths
+(This is an example that highlights the differences in the meanings of *birth* and *death*
+events in survival analysis, and in fact completely flips the ideas upside down by using deaths
 as the censorship event. This is also an example where the current time
 is not the only cause of censorship -- there are alternative
 events (eg: death in office) that can censor.)
@@ -49,7 +49,8 @@ Let's bring in our dataset.
 .. code:: python
 
     import pandas as pd
-    import lifelines 
+    import lifelines
+    import lifelines.datasets 
 
     data = lifelines.datasets.load_dd()
 
@@ -171,6 +172,7 @@ From the ``1ifelines`` library, we'll need the
 .. code:: python
 
     from lifelines import KaplanMeierFitter
+    
     kmf = KaplanMeierFitter()
 
 For this estimation, we need the duration each leader was/has been in
@@ -211,7 +213,7 @@ Below we fit our data to the fitter:
     T = data["duration"] 
     C = data["observed"] 
 
-    kmf.fit(T, event_observed=C )
+    kmf.fit(T, event_observed=C)
 
 
 
@@ -222,11 +224,13 @@ Below we fit our data to the fitter:
 
 After calling the ``fit`` method, the ``KaplanMeierFitter`` has a property
 called ``survival_function_``. (Again, we follow the styling of
-scikit-learn, and append an underscore to all properties that were computational estimated)
+scikit-learn, and append an underscore to all properties that were computationally estimated)
 The property is a Pandas DataFrame, so we can call ``plot`` on it:
 
 .. code:: python
 
+    from matplotlib import pyplot as plt
+    
     kmf.survival_function_.plot()
     plt.title('Survival function of political regimes');
 
@@ -253,8 +257,8 @@ to plot both the KM estimate and its confidence intervals:
 .. note::  Don't like the shaded area for confidence intervals? See below for examples on how to change this.
 
 
-The median time in office, which defines the point in time where on
-average 1/2 of the population has expired, is a property:
+The median time in office is the point in time where, on
+average, half of the population has expired. This is defined as a property:
 
 .. code:: python
 
@@ -265,8 +269,8 @@ average 1/2 of the population has expired, is a property:
 
 
 
-Interesting that it is only 3 years. That means, around the world, when
-a leader is elected there is a 50% chance he or she will be gone in 3
+Interesting that it is only 4 years. That means, around the world, when
+a leader is elected there is a 50% chance he or she will be gone in 4
 years!
 
 Let's segment on democratic regimes vs non-democratic regimes. Calling
@@ -275,6 +279,8 @@ an ``axis`` object, that can be used for plotting further estimates:
 
 .. code:: python
 
+    import numpy as np
+    
     ax = plt.subplot(111)
     
     dem = (data["democracy"] == "Democracy")
@@ -297,7 +303,7 @@ probabilties of survival at those points:
 
 .. code:: python
 
-    ax = subplot(111)
+    ax = plt.subplot(111)
     
     t = np.linspace(0,50,51)
     kmf.fit(T[dem], event_observed=C[dem], timeline=t, label="Democratic Regimes")
@@ -322,18 +328,18 @@ probabilties of survival at those points:
 .. image:: Introtolifelines_files/Introtolifelines_21_1.png
 
 
-It is incredible how much longer these non-democratic regimes exist for.
+It is incredible how much longer non-democratic regimes exist, in comparison to democratic regimes.
 A democratic regime does have a natural bias towards death though: both
-via elections and natural limits (the US imposes a strict 8 year limit).
-The median of a non-democractic is only about twice as large as a
+via elections and natural limits (the office of U.S. president imposes a limit of 2 4-year terms or a maximum of 10 years).
+The median lifetime of a non-democractic regime is only about twice as large as a
 democratic regime, but the difference is really apparent in the tails:
 if you're a non-democratic leader, and you've made it past the 10 year
 mark, you probably have a long life ahead. Meanwhile, a democratic
-leader rarely makes it past 10 years, and then have a very short
+leader rarely makes it past 10 years, and then typically has a very short
 lifetime past that.
 
 Here the difference between survival functions is very obvious, and
-performing a statistical test seems pendantic. If the curves are more
+performing a statistical test seems pedantic. If the curves are more
 similar, or we possess less data, we may be interested in performing a
 statistical test. In this case, *lifelines* contains routines in
 ``lifelines.statistics`` to compare two survival curves. Below we
@@ -376,7 +382,7 @@ Lets compare the different *types* of regimes present in the dataset:
         kmf.plot(ax=ax, legend=False)
         plt.title(regime_type)
         plt.xlim(0,50)
-        if i==0:
+        if i == 0:
             plt.ylabel('Frac. in power after $n$ years')
         if i == 3:
             plt.xlabel("Years in power")
@@ -391,8 +397,8 @@ Lets compare the different *types* of regimes present in the dataset:
 Getting data into the right format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*lifelines* data format is consistent across all estimator class and
-functions: an array of individual durations, and the individuals
+*lifelines* data format is consistent across all estimator classes and
+functions: an array of individual durations, and the individuals'
 event observation (if any). These are often denoted ``T`` and ``C``
 respectively. For example:
 
@@ -400,12 +406,12 @@ respectively. For example:
 
     T = [0,3,3,2,1,2]
     C = [1,1,0,0,1,1]
-    kmf.fit(T, event_observed=C )
+    kmf.fit(T, event_observed=C)
 
 The raw data is not always available in this format -- *lifelines*
 includes some helper functions to transform data formats to *lifelines*
 format. These are located in the ``lifelines.utils`` sublibrary. For
-example, the function ``datetimes_to_durations`` accepts an arrary or
+example, the function ``datetimes_to_durations`` accepts an array or
 Pandas object of start times/dates, and an array or Pandas objects of
 end times/dates (or ``None`` if not observed):
 
@@ -417,7 +423,7 @@ end times/dates (or ``None`` if not observed):
     end_date = ['2013-10-13', '2013-10-10', None]
     T,C = datetimes_to_durations(start_date, end_date, fill_date='2013-10-15')
     print 'T (durations): ', T
-    print 'C (event_observed): ',C
+    print 'C (event_observed): ', C
 
 .. parsed-literal::
 
@@ -425,14 +431,14 @@ end times/dates (or ``None`` if not observed):
     C (event_observed):  [ True  True False]
 
 
-The function ``datetimes_to_durations`` is very flexible, and has many
+The ``datetimes_to_durations`` function is very flexible, and has many
 keywords to tinker with.
 
 Estimating hazard rates using Nelson-Aalen
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 The survival curve is a great way to summarize and visualize the
-lifetime data, it is not the only way. If we are curious about the hazard function :math:`\lambda(t)` of a
+lifetime data, however it is not the only way. If we are curious about the hazard function :math:`\lambda(t)` of a
 population, we unfortunatly cannot transform the Kaplan Meier estimate
 -- statistics doesn't work quite that well. Fortunately, there is a
 proper estimator of the *cumulative* hazard function:
@@ -460,7 +466,7 @@ In *lifelines*, this estimator is available as the ``NelsonAalenFitter``. Let's 
     from lifelines import NelsonAalenFitter
     naf = NelsonAalenFitter()
 
-    naf.fit(T,event_observed=C)
+    naf.fit(T, event_observed=C)
 
 
 After fitting, the class exposes the property ``cumulative_hazard_`` as
@@ -487,7 +493,7 @@ a DataFrame:
 .. image:: Introtolifelines_files/Introtolifelines_34_1.png
 
 
-The cumulative hazard has less immediate understanding than the survival
+The cumulative hazard curve may be less intuitive than the survival
 curve, but the hazard curve is the basis of more advanced techniques in
 survival anaylsis. Recall that we are estimating *cumulative hazard
 curve*, :math:`\Lambda(t)`. (Why? The sum of estimates is much more
@@ -527,9 +533,9 @@ is not how we usually interpret functions. (On the other hand, most
 survival analysis is done using the cumulative hazard fuction, so understanding
 it is recommended).
 
-Alternatively, we can derive the more-interpretable hazard curve, but
+Alternatively, we can derive the more interpretable hazard curve, but
 there is a catch. The derivation involves a kernel smoother (to smooth
-out the differences of the cumulative hazard curve) , and this requires
+out the differences of the cumulative hazard curve), and this requires
 us to specify a bandwidth parameter that controls the amount of
 smoothing. This functionality is provided in the ``smoothed_hazard_``
 and ``hazard_confidence_intervals_`` methods. (Why methods? They require
@@ -546,9 +552,9 @@ intervals, similar to the traditional ``plot`` functionality.
     ax = naf.plot_hazard(bandwidth=b)
     naf.fit(T[~dem], event_observed=C[~dem], label="Non-democratic Regimes")
     naf.plot_hazard(ax=ax, bandwidth=b)
-    plt.title("Hazard function of different global regimes | bandwith=%.1f"%b);
-    plt.ylim(0,0.4)
-    plt.xlim(0,25);
+    plt.title("Hazard function of different global regimes | bandwith=%.1f" % b);
+    plt.ylim(0, 0.4)
+    plt.xlim(0, 25);
 
 
 .. image:: Introtolifelines_files/Introtolifelines_39_0.png
@@ -585,23 +591,24 @@ Left Censored Data
 We've mainly been focusing on *right-censorship*, which describes cases where we do not observe the death event.
 This situation is the most common one. Alternatively, there are situations where we do not observe the *birth* event
 occuring. Consider the case where a doctor sees a delayed onset of symptoms of an underlying disease. The doctor
-is unsure *when* the disease was contracted (birth), but know it was before the discovery. 
+is unsure *when* the disease was contracted (the birth of the disease), 
+but knows the birth occurred before the discovery of the symptoms. This would an example of *left-censorship*.
 
-Another situation where we have left censored data is when measurements have only an upperbound, that is, the measurements
+Another situation where we have left censored data is when measurements have only an upperbound, that is, the measurement
 instruments could only detect the measurement was *less* than some upperbound.
 
 *lifelines* has support for left-censored datasets in the ``KaplanMeierFitter`` class, by adding the keyword ``left_censorship=True`` (default ``False``) to the call to ``fit``. 
 
 .. code:: python
 
-    from lifelines.datasets import generate_lcd_dataset
-    lcd_dataset = generate_lcd_dataset()
+    from lifelines.datasets import load_lcd
+    lcd_dataset = load_lcd()
 
-    T = lcd_dataset['alluvial_fan']['T']
-    C = lcd_dataset['alluvial_fan']['C'] #boolean array, True if observed.
+    T = lcd_dataset['T']
+    C = lcd_dataset['C'] #boolean array, True if observed.
 
     kmf = KaplanMeierFitter()
-    kmf.fit(T,C, left_censorship=True)  
+    kmf.fit(T, C, left_censorship=True)  
 
 Instead of producing a survival function, left-censored data is more interested in the cumulative density function
 of time to birth. This is available as the ``cumulative_density_`` property aftering fitting the data.
@@ -615,12 +622,14 @@ of time to birth. This is available as the ``cumulative_density_`` property afte
 Left Truncated Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Another form of bias that can be introduced into a dataset is called left-truncation. (Also a form of censorship). 
-This occurs when individuals may die even before ever entrying into the study. Both  ``KaplanMeierFitter`` and ``NelsonAalenFitter`` have an optional arugment for ``entry``, which is an array of equal size to the duration array.
+Another form of bias that can be introduced into a dataset is called *left-truncation*. (Also a form of censorship). 
+This occurs when individuals may die even before ever entering into the study. 
+Both  ``KaplanMeierFitter`` and ``NelsonAalenFitter`` have an optional argument for ``entry``, 
+which is an array of equal size to the duration array.
 It describes the offset from birth to entering the study. This is also useful when subjects enter the study at different
 points in their lifetime. For example, if you are measuring time to death of prisoners in 
 prison, the prisoners will enter the study at different ages. 
 
  .. note:: Nothing changes in the duration array: it still measures time from entry of study to time left study (either by death or censorship)
 
- .. note:: Other types of censorship, like interval-censorship, are not implemented in *lifelines* yet.
+ .. note:: Other types of censorship, like *interval-censorship*, are not implemented in *lifelines* yet.
